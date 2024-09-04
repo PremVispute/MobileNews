@@ -1,21 +1,23 @@
 // app/components/NewsCard.tsx
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 
 interface NewsCardProps {
   title: string;
   description: string;
-  imageUrl: string;
+  urlToImage: string;
 }
+
+const { height } = Dimensions.get("window");
 
 const NewsCard: React.FC<NewsCardProps> = ({
   title,
   description,
-  imageUrl,
+  urlToImage,
 }) => {
   return (
-    <View style={styles.card}>
-      <Image source={{ uri: imageUrl }} style={styles.image} />
+    <View style={[styles.card, { height }]}>
+      <Image source={{ uri: urlToImage }} style={styles.image} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
@@ -26,8 +28,9 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    margin: 10,
-    borderRadius: 8,
+    flex: 1,
+    margin: 0,
+    borderRadius: 0,
     overflow: "hidden",
     backgroundColor: "#fff",
     shadowColor: "#000",
@@ -38,18 +41,20 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 200,
+    height: "60%",
   },
   textContainer: {
     padding: 10,
+    flex: 1,
+    justifyContent: "center",
   },
   title: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 10,
   },
   description: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#555",
   },
 });

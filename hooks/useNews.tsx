@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 
 interface NewsItem {
+  urlToImage: string;
   title: string;
   description: string;
-  imageUrl: string;
 }
 
 const useNews = () => {
@@ -15,7 +15,7 @@ const useNews = () => {
     const fetchNews = async () => {
       try {
         const response = await fetch(
-          "https://newsapi.org/v2/top-headlines?country=us&apiKey=599b400f84f74625841e05ddc3fd06ff"
+          "https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey=599b400f84f74625841e05ddc3fd06ff"
         );
         const data = await response.json();
         setNews(data.articles);
