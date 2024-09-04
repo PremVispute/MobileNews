@@ -1,27 +1,70 @@
 // app/components/NewsCard.tsx
 import React from "react";
-import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Dimensions,
+  ImageBackground,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
 
 interface NewsCardProps {
   title: string;
   description: string;
   urlToImage: string;
+  url: string;
+  author: string;
 }
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 const NewsCard: React.FC<NewsCardProps> = ({
   title,
   description,
   urlToImage,
+  url,
+  author,
 }) => {
   return (
-    <View style={[styles.card, { height }]}>
-      <Image source={{ uri: urlToImage }} style={styles.image} />
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.description}>{description}</Text>
+    <View
+      style={{
+        height: height,
+        width: width,
+      }}
+    >
+      <Image
+        source={{ uri: urlToImage }}
+        style={{ height: "45%", resizeMode: "cover", width: width }}
+      />
+      <View
+        style={{
+          ...styles.description,
+        }}
+      >
+        <Text style={{ ...styles.title }}>{title}</Text>
+        <Text style={{ ...styles.content }}>{description}</Text>
+        <Text>
+          Short by
+          <Text style={{ fontWeight: "bold" }}> {author ?? "unknown"}</Text>
+        </Text>
       </View>
+      <ImageBackground
+        blurRadius={30}
+        style={styles.footer}
+        source={{ uri: urlToImage }}
+      >
+        <TouchableOpacity onPress={() => Linking.openURL(url)}>
+          <Text style={{ fontSize: 15, color: "white" }}>
+            '{description?.slice(0, 45)}...'
+          </Text>
+          <Text style={{ fontSize: 17, fontWeight: "bold", color: "white" }}>
+            Read More
+          </Text>
+        </TouchableOpacity>
+      </ImageBackground>
     </View>
   );
 };
@@ -48,14 +91,24 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
   description: {
-    fontSize: 16,
-    color: "#555",
+    padding: 15,
+    flex: 1,
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: "bold",
+    paddingBottom: 10,
+  },
+  content: { fontSize: 18, paddingBottom: 10 },
+  footer: {
+    height: 80,
+    width: width,
+    position: "absolute",
+    bottom: 80,
+    backgroundColor: "#d7be69",
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
 });
 

@@ -1,43 +1,62 @@
-// app/(tabs)/index.tsx
-import React from "react";
-import {
-  FlatList,
-  ActivityIndicator,
-  Dimensions,
-  StyleSheet,
-} from "react-native";
+import React, { useRef } from "react";
+import { ActivityIndicator, Dimensions, StyleSheet, View } from "react-native";
+import Carousel from "react-native-snap-carousel";
 import NewsCard from "@/components/NewsCard";
 import useNews from "@/hooks/useNews";
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const { news, loading } = useNews();
+  const { news, loading, loadMore } = useNews();
+  const carouselRef = useRef<Carousel<any>>(null);
 
-  if (loading) {
+  const handleSnapToItem = (index: number) => {
+    const threshold = Math.floor(news.length * 0.8); // 80% of the current data
+    if (index >= threshold) {
+      loadMore(); // Load more data when the user reaches near the end
+    }
+  };
+
+  if (loading && news.length === 0) {
     return (
       <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
     );
   }
 
   return (
-    <FlatList
-      data={news}
-      renderItem={({ item }) => (
-        <NewsCard
-          title={item.title}
-          description={item.description}
-          urlToImage={item.urlToImage}
+    <View style={styles.container}>
+      <Carousel
+        ref={carouselRef}
+        data={news}
+        renderItem={({ item }) => (
+          <NewsCard
+            title={item.title}
+            description={item.description}
+            urlToImage={item.urlToImage}
+            url={item.url}
+            author={item.author}
+          />
+        )}
+        sliderHeight={height}
+        itemHeight={height}
+        vertical={true}
+        sliderWidth={width}
+        itemWidth={width}
+        inactiveSlideOpacity={1}
+        inactiveSlideScale={1}
+        snapToAlignment={"start"}
+        onSnapToItem={handleSnapToItem}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+      />
+      {loading && news.length > 0 && (
+        <ActivityIndicator
+          size="small"
+          color="#0000ff"
+          style={styles.footerLoader}
         />
       )}
-      keyExtractor={(item, index) => index.toString()}
-      pagingEnabled
-      snapToAlignment="start"
-      decelerationRate="fast"
-      showsVerticalScrollIndicator={false}
-      snapToInterval={height}
-      contentContainerStyle={styles.container}
-    />
+    </View>
   );
 }
 
@@ -47,6 +66,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   container: {
-    paddingVertical: 0,
+    flex: 1,
+  },
+  footerLoader: {
+    position: "absolute",
+    bottom: 10,
+    alignSelf: "center",
   },
 });
