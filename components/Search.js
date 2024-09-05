@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
 import {
-  Dimensions,
   Modal,
   StyleSheet,
   Text,
