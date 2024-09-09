@@ -7,9 +7,18 @@ import { useNewsContext } from "@/hooks/NewsContext";
 const { height, width } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const { news, loading, loadMore, category, source } = useNewsContext(); // Access category and source
+  const {
+    news,
+    loading,
+    loadMore,
+    saveNewsItem,
+    removeSavedNewsItem,
+    fetchSavedNews,
+    currentUser,
+  } = useNewsContext();
   const carouselRef = useRef<Carousel<any>>(null);
   const [localNews, setLocalNews] = useState(news);
+  const [savedNewsIds, setSavedNewsIds] = useState<string[]>([]);
 
   const handleSnapToItem = (index: number) => {
     const threshold = Math.floor(localNews.length * 0.8);
@@ -18,15 +27,36 @@ export default function HomeScreen() {
     }
   };
 
+  // Fetch saved news on load and when currentUser changes
+  useEffect(() => {
+    const loadSavedNews = async () => {
+      if (currentUser?.uid) {
+        const savedNewsItems = await fetchSavedNews(currentUser.uid);
+        const savedIds = savedNewsItems.map((item) => item.url); // Assuming 'url' is unique
+        setSavedNewsIds(savedIds);
+      }
+    };
+
+    loadSavedNews();
+  }, [currentUser]);
+
   // Update local state when the news changes
   useEffect(() => {
     setLocalNews(news);
   }, [news]);
 
-  // Trigger re-render whenever category or source changes
-  useEffect(() => {
-    console.log("Category or Source changed:", category, source);
-  }, [category, source]); // Listen for changes in category and source
+  // Toggle saved status for a news item
+  const handleSaveToggle = (newsItem: any) => {
+    const isAlreadySaved = savedNewsIds.includes(newsItem.url);
+
+    if (isAlreadySaved) {
+      removeSavedNewsItem(newsItem.url); // Remove from saved news
+      setSavedNewsIds((prev) => prev.filter((id) => id !== newsItem.url));
+    } else {
+      saveNewsItem(newsItem); // Save the news
+      setSavedNewsIds((prev) => [...prev, newsItem.url]);
+    }
+  };
 
   if (loading && localNews.length === 0) {
     return (
@@ -46,6 +76,8 @@ export default function HomeScreen() {
             urlToImage={item.urlToImage}
             url={item.url}
             author={item.author}
+            isSaved={savedNewsIds.includes(item.url)} // Check if the news is saved
+            onTitlePress={() => handleSaveToggle(item)} // Toggle save on title press
           />
         )}
         sliderHeight={height}

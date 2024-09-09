@@ -17,6 +17,8 @@ interface NewsCardProps {
   urlToImage: string;
   url: string;
   author: string;
+  isSaved: boolean;
+  onTitlePress: () => void;
 }
 
 const { height, width } = Dimensions.get("window");
@@ -26,6 +28,8 @@ const NewsCard: React.FC<NewsCardProps> = ({
   description,
   urlToImage,
   url,
+  isSaved,
+  onTitlePress,
   author,
 }) => {
   return (
@@ -44,7 +48,11 @@ const NewsCard: React.FC<NewsCardProps> = ({
           ...styles.description,
         }}
       >
-        <Text style={{ ...styles.title }}>{title}</Text>
+        <TouchableOpacity onPress={onTitlePress}>
+          <Text style={[styles.title, { color: isSaved ? "blue" : "black" }]}>
+            {title}
+          </Text>
+        </TouchableOpacity>
         <Text style={{ ...styles.content }}>{description}</Text>
         <Text>
           Short by

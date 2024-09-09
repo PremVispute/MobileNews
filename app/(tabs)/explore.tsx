@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 export default function Explore() {
   const { width } = Dimensions.get("window");
   const SLIDE_WIDTH = Math.round(width / 3.5);
-  const { setCategory, setSource, category } = useNewsContext();
+  const { setCategory, setSource } = useNewsContext();
   const navigation = useNavigation();
 
   const handleCategorySelect = useCallback(
@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
   discover: {
     padding: 10,
     alignItems: "center",
+    marginTop: 30,
   },
   subtitle: {
     fontSize: 20,
