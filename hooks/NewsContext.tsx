@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, ReactNode } from "react";
 
 interface NewsItem {
   urlToImage: string;
@@ -6,7 +6,19 @@ interface NewsItem {
   description: string;
 }
 
-const useNews = () => {
+interface NewsContextType {
+  news: NewsItem[];
+  loading: boolean;
+  category: string;
+  source: string | null;
+  setCategory: (category: string) => void;
+  setSource: (source: string | null) => void;
+  loadMore: () => void;
+}
+
+const NewsContext = createContext<NewsContextType | undefined>(undefined);
+
+export const NewsProvider = ({ children }: { children: ReactNode }) => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -19,11 +31,6 @@ const useNews = () => {
       const baseUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=599b400f84f74625841e05ddc3fd06ff`;
       const categoryQuery = category ? `&category=${category}` : "";
       const sourceQuery = source ? `&sources=${source}` : `&page=${page}`;
-
-      console.log(
-        "Fetching news with URL:",
-        baseUrl + categoryQuery + sourceQuery
-      ); // Log the request URL
 
       const response = await fetch(baseUrl + categoryQuery + sourceQuery);
       const data = await response.json();
@@ -38,9 +45,6 @@ const useNews = () => {
   };
 
   useEffect(() => {
-    console.log("Category or Source changed. Fetching news...");
-    console.log("Category:", category, "Source:", source);
-
     setPage(1);
     setNews([]);
     fetchNews();
@@ -56,7 +60,27 @@ const useNews = () => {
     setPage((prevPage) => prevPage + 1);
   };
 
-  return { news, loading, loadMore, setCategory, setSource, category, source };
+  return (
+    <NewsContext.Provider
+      value={{
+        news,
+        loading,
+        category,
+        source,
+        setCategory,
+        setSource,
+        loadMore,
+      }}
+    >
+      {children}
+    </NewsContext.Provider>
+  );
 };
 
-export default useNews;
+export const useNewsContext = () => {
+  const context = React.useContext(NewsContext);
+  if (!context) {
+    throw new Error("useNewsContext must be used within a NewsProvider");
+  }
+  return context;
+};

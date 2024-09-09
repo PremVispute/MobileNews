@@ -9,13 +9,13 @@ import {
 } from "react-native";
 import Carousel from "react-native-snap-carousel";
 import { categories, sources } from "@/components/api";
-import useNews from "@/hooks/useNews";
+import { useNewsContext } from "@/hooks/NewsContext";
 import { useNavigation } from "@react-navigation/native";
 
 export default function Explore() {
   const { width } = Dimensions.get("window");
   const SLIDE_WIDTH = Math.round(width / 3.5);
-  const { setCategory, setSource, category } = useNews();
+  const { setCategory, setSource, category } = useNewsContext();
   const navigation = useNavigation();
 
   const handleCategorySelect = useCallback(

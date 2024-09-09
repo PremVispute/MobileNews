@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Dimensions, StyleSheet, View } from "react-native";
 import Carousel from "react-native-snap-carousel";
 import NewsCard from "@/components/NewsCard";
-import useNews from "@/hooks/useNews";
+import { useNewsContext } from "@/hooks/NewsContext";
 
 const { height, width } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const { news, loading, loadMore, category, source } = useNews(); // Access category and source
+  const { news, loading, loadMore, category, source } = useNewsContext(); // Access category and source
   const carouselRef = useRef<Carousel<any>>(null);
   const [localNews, setLocalNews] = useState(news);
 
