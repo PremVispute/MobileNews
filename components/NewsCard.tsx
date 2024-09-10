@@ -33,12 +33,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
   author,
 }) => {
   return (
-    <View
-      style={{
-        height: height,
-        width: width,
-      }}
-    >
+    <View style={styles.card}>
       <Image
         source={{ uri: urlToImage }}
         style={{ height: "45%", resizeMode: "cover", width: width }}
@@ -80,6 +75,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     flex: 1,
+    height: height,
     margin: 0,
     borderRadius: 0,
     overflow: "hidden",
