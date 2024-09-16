@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -25,34 +25,36 @@ export default function HomeScreen() {
     currentUser,
   } = useNewsContext();
   const carouselRef = useRef<Carousel<any>>(null);
-  const [localNews, setLocalNews] = useState(news);
+  // const [localNews, setLocalNews] = useState(news);
   const [savedNewsIds, setSavedNewsIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("My Feed");
+  const [activeIndex, setActiveIndex] = useState();
 
-  const handleSnapToItem = (index: number) => {
-    const threshold = Math.floor(localNews.length * 0.8);
-    if (index >= threshold) {
-      loadMore();
-    }
+  const handleSnapToItem = (index: any) => {
+    setActiveIndex(index);
+    // const threshold = Math.floor(localNews.length * 0.8);
+    // if (index >= threshold) {
+    //   loadMore();
+    // }
   };
 
   // Fetch saved news on load and when currentUser changes
-  useEffect(() => {
-    const loadSavedNews = async () => {
-      if (currentUser?.uid) {
-        const savedNewsItems = await fetchSavedNews(currentUser.uid);
-        const savedIds = savedNewsItems.map((item) => item.url); // Assuming 'url' is unique
-        setSavedNewsIds(savedIds);
-      }
-    };
+  // useEffect(() => {
+  //   const loadSavedNews = async () => {
+  //     if (currentUser?.uid) {
+  //       const savedNewsItems = await fetchSavedNews(currentUser.uid);
+  //       const savedIds = savedNewsItems.map((item) => item.url); // Assuming 'url' is unique
+  //       setSavedNewsIds(savedIds);
+  //     }
+  //   };
 
-    loadSavedNews();
-  }, [currentUser]);
+  //   loadSavedNews();
+  // }, [currentUser]);
 
   // Update local state when the news changes
-  useEffect(() => {
-    setLocalNews(news);
-  }, [news]);
+  // useEffect(() => {
+  //   setLocalNews(news);
+  // }, [news]);
 
   // Toggle saved status for a news item
   const handleSaveToggle = (newsItem: any) => {
@@ -85,7 +87,7 @@ export default function HomeScreen() {
     "aetbaet",
   ];
 
-  if (loading && localNews.length === 0) {
+  if (loading) {
     return (
       <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
     );
@@ -122,8 +124,9 @@ export default function HomeScreen() {
       <View style={styles.carousel}>
         <Carousel
           ref={carouselRef}
-          data={localNews}
+          data={news}
           layout="stack"
+          firstItem={news.slice(0, 10).length - 1}
           renderItem={({ item }) => (
             <NewsCard
               title={item.title}
@@ -140,14 +143,14 @@ export default function HomeScreen() {
           vertical={true}
           sliderWidth={width}
           itemWidth={width}
-          inactiveSlideOpacity={1}
-          inactiveSlideScale={1}
+          // inactiveSlideOpacity={1}
+          // inactiveSlideScale={1}
           snapToAlignment={"start"}
           onSnapToItem={handleSnapToItem}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.container}
+          // showsVerticalScrollIndicator={false}
+          // contentContainerStyle={styles.container}
         />
-        {loading && localNews.length > 0 && (
+        {loading && (
           <ActivityIndicator
             size="small"
             color="#0000ff"
