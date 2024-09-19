@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -18,60 +18,82 @@ export default function HomeScreen() {
   const {
     news,
     loading,
-    loadMore,
     saveNewsItem,
     removeSavedNewsItem,
-    fetchSavedNews,
-    currentUser,
   } = useNewsContext();
   const carouselRef = useRef<Carousel<any>>(null);
-  // const [localNews, setLocalNews] = useState(news);
   const [savedNewsIds, setSavedNewsIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("My Feed");
-  const [activeIndex, setActiveIndex] = useState();
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [action, setAction] = useState("Play");
+  const [highlightedText, setHighlightedText] = useState<string[]>([]);
+  const [typewriterText, setTypewriterText] = useState<string>("");
+  const [isHighlighting, setIsHighlighting] = useState(true); // Toggle between highlight and typewriter
 
-  const handleSnapToItem = (index: any) => {
+  const handleSnapToItem = (index: number) => {
     setActiveIndex(index);
-    // const threshold = Math.floor(localNews.length * 0.8);
-    // if (index >= threshold) {
-    //   loadMore();
-    // }
   };
 
-  // Fetch saved news on load and when currentUser changes
-  // useEffect(() => {
-  //   const loadSavedNews = async () => {
-  //     if (currentUser?.uid) {
-  //       const savedNewsItems = await fetchSavedNews(currentUser.uid);
-  //       const savedIds = savedNewsItems.map((item) => item.url); // Assuming 'url' is unique
-  //       setSavedNewsIds(savedIds);
-  //     }
-  //   };
-
-  //   loadSavedNews();
-  // }, [currentUser]);
-
-  // Update local state when the news changes
-  // useEffect(() => {
-  //   setLocalNews(news);
-  // }, [news]);
-
-  // Toggle saved status for a news item
   const handleSaveToggle = (newsItem: any) => {
     const isAlreadySaved = savedNewsIds.includes(newsItem.url);
 
     if (isAlreadySaved) {
-      removeSavedNewsItem(newsItem.url); // Remove from saved news
+      removeSavedNewsItem(newsItem.url);
       setSavedNewsIds((prev) => prev.filter((id) => id !== newsItem.url));
     } else {
-      saveNewsItem(newsItem); // Save the news
+      saveNewsItem(newsItem);
       setSavedNewsIds((prev) => [...prev, newsItem.url]);
     }
   };
 
   const handleCategoryPress = (category: string) => {
     setSelectedCategory(category);
-    // You can add logic to filter news based on category
+  };
+
+  // Handle button press to toggle between highlighting and typewriter
+  const handleActionPress = () => {
+    if (isHighlighting) {
+      highlightText();
+      setAction("Read");
+    } else {
+      typewriterEffect();
+      setAction("Play");
+    }
+    setIsHighlighting(!isHighlighting);
+  };
+
+  // Function to highlight words one by one
+  const highlightText = () => {
+    if (activeIndex !== null) {
+      const selectedNews = news[activeIndex].title.split(" ");
+      let i = 0;
+      setHighlightedText([]);
+      const interval = setInterval(() => {
+        if (i >= selectedNews.length) {
+          clearInterval(interval);
+        } else {
+          setHighlightedText((prev) => [...prev, selectedNews[i]]);
+          i++;
+        }
+      }, 500); // Adjust timing as per requirement
+    }
+  };
+
+  // Function to simulate typewriter effect
+  const typewriterEffect = () => {
+    if (activeIndex !== null) {
+      const selectedNews = news[activeIndex].title;
+      let i = 0;
+      setTypewriterText("");
+      const interval = setInterval(() => {
+        if (i >= selectedNews.length) {
+          clearInterval(interval);
+        } else {
+          setTypewriterText((prev) => prev + selectedNews[i]);
+          i++;
+        }
+      }, 100); // Adjust speed of typewriter effect
+    }
   };
 
   const categories = [
@@ -121,6 +143,11 @@ export default function HomeScreen() {
           )}
         />
       </View>
+      <View style={styles.navContainer2}>
+        <TouchableOpacity style={styles.pill} onPress={handleActionPress}>
+          <Text style={styles.pillText}>{action}</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.carousel}>
         <Carousel
           ref={carouselRef}
@@ -134,8 +161,8 @@ export default function HomeScreen() {
               urlToImage={item.urlToImage}
               url={item.url}
               author={item.author}
-              isSaved={savedNewsIds.includes(item.url)} // Check if the news is saved
-              onTitlePress={() => handleSaveToggle(item)} // Toggle save on title press
+              isSaved={savedNewsIds.includes(item.url)}
+              onTitlePress={() => handleSaveToggle(item)}
             />
           )}
           sliderHeight={height}
@@ -143,12 +170,8 @@ export default function HomeScreen() {
           vertical={true}
           sliderWidth={width}
           itemWidth={width}
-          // inactiveSlideOpacity={1}
-          // inactiveSlideScale={1}
           snapToAlignment={"start"}
           onSnapToItem={handleSnapToItem}
-          // showsVerticalScrollIndicator={false}
-          // contentContainerStyle={styles.container}
         />
         {loading && (
           <ActivityIndicator
@@ -156,6 +179,17 @@ export default function HomeScreen() {
             color="#0000ff"
             style={styles.footerLoader}
           />
+        )}
+      </View>
+
+      {/* Render Highlighted Text or Typewriter Text */}
+      <View style={styles.textContainer}>
+        {isHighlighting ? (
+          <Text style={styles.highlightedText}>
+            {highlightedText.join(" ")}
+          </Text>
+        ) : (
+          <Text style={styles.typewriterText}>{typewriterText}</Text>
         )}
       </View>
     </View>
@@ -188,6 +222,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
     paddingHorizontal: 10,
   },
+  navContainer2: {
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    paddingHorizontal: 10,
+  },
   pill: {
     paddingVertical: 8,
     paddingHorizontal: 15,
@@ -205,5 +247,19 @@ const styles = StyleSheet.create({
   selectedPillText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  textContainer: {
+    position: "absolute",
+    bottom: 80,
+    alignSelf: "center",
+    paddingHorizontal: 10,
+  },
+  highlightedText: {
+    color: "yellow",
+    fontSize: 24,
+  },
+  typewriterText: {
+    color: "white",
+    fontSize: 24,
   },
 });
