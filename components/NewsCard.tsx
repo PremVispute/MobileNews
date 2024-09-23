@@ -1,5 +1,4 @@
-// app/components/NewsCard.tsx
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -32,28 +31,100 @@ const NewsCard: React.FC<NewsCardProps> = ({
   onTitlePress,
   author,
 }) => {
+  const [action, setAction] = useState("Play");
+  const [highlightedText, setHighlightedText] = useState<string[]>([]);
+  const [typedText, setTypedText] = useState("");
+  const [displayMode, setDisplayMode] = useState<
+    "normal" | "highlight" | "typewriter"
+  >("normal");
+
+  const intervalRef = useRef<any>(null);
+  const typewriterIntervalRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      clearInterval(intervalRef.current);
+      clearInterval(typewriterIntervalRef.current);
+    };
+  }, []);
+
+  const handleActionPress = () => {
+    if (action === "Play") {
+      setDisplayMode("highlight");
+      highlightText();
+      setAction("Read");
+    } else if (action === "Read") {
+      setDisplayMode("typewriter");
+      typewriterEffect();
+      setAction("Play");
+    }
+  };
+
+  const highlightText = () => {
+    const words = description.split(" ");
+    setHighlightedText([]); // Reset highlighted text
+    clearInterval(intervalRef.current); // Clear previous intervals
+    let index = 0;
+
+    intervalRef.current = setInterval(() => {
+      if (index < words.length) {
+        setHighlightedText((prev) => [...prev, words[index]]);
+        index++;
+      } else {
+        clearInterval(intervalRef.current);
+      }
+    }, 200); // Adjust the speed of highlighting
+  };
+
+  const typewriterEffect = () => {
+    clearInterval(typewriterIntervalRef.current); // Clear previous intervals
+    setTypedText(""); // Reset typed text
+    let index = 0;
+
+    typewriterIntervalRef.current = setInterval(() => {
+      if (index < description.length) {
+        setTypedText((prev) => prev + description[index]);
+        index++;
+      } else {
+        clearInterval(typewriterIntervalRef.current);
+      }
+    }, 100); // Adjust the speed of typing
+  };
+
   return (
     <View style={styles.card}>
       <Image
         source={{ uri: urlToImage }}
         style={{ height: "45%", resizeMode: "cover", width: width }}
       />
-      <View
-        style={{
-          ...styles.description,
-        }}
-      >
+      <View style={styles.description}>
         <TouchableOpacity onPress={onTitlePress}>
           <Text style={[styles.title, { color: isSaved ? "blue" : "black" }]}>
             {title}
           </Text>
         </TouchableOpacity>
-        <Text style={{ ...styles.content }}>{description}</Text>
+
+        {/* Conditionally render the description based on the current display mode */}
+        {displayMode === "normal" ? (
+          <Text style={styles.content}>{description}</Text> // Initially show normal content
+        ) : displayMode === "highlight" ? (
+          <Text style={styles.content}>
+            {highlightedText.map((word, index) => (
+              <Text key={index} style={styles.highlight}>
+                {word}{" "}
+              </Text>
+            ))}
+          </Text> // Show highlighted text
+        ) : (
+          <Text style={styles.content}>{typedText}</Text> // Show typewriter text
+        )}
+
         <Text>
           Short by
           <Text style={{ fontWeight: "bold" }}> {author ?? "unknown"}</Text>
         </Text>
       </View>
+
       <ImageBackground
         blurRadius={30}
         style={styles.footer}
@@ -68,6 +139,12 @@ const NewsCard: React.FC<NewsCardProps> = ({
           </Text>
         </TouchableOpacity>
       </ImageBackground>
+
+      <View style={styles.navContainer2}>
+        <TouchableOpacity style={styles.pill} onPress={handleActionPress}>
+          <Text style={styles.pillText}>{action}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -92,11 +169,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "60%",
   },
-  textContainer: {
-    padding: 10,
-    flex: 1,
-    justifyContent: "center",
-  },
   description: {
     padding: 15,
     flex: 1,
@@ -106,7 +178,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingBottom: 10,
   },
-  content: { fontSize: 18, paddingBottom: 10 },
+  content: {
+    fontSize: 18,
+    paddingBottom: 10,
+  },
+  highlight: {
+    backgroundColor: "yellow",
+  },
   footer: {
     height: 80,
     width: width,
@@ -115,6 +193,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#d7be69",
     justifyContent: "center",
     paddingHorizontal: 20,
+  },
+  navContainer2: {
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    paddingHorizontal: 10,
+  },
+  pill: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 20,
+    marginHorizontal: 5,
+  },
+  pillText: {
+    color: "#333",
+    fontSize: 16,
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -15,22 +15,13 @@ import { useNewsContext } from "@/hooks/NewsContext";
 const { height, width } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const {
-    news,
-    loading,
-    saveNewsItem,
-    removeSavedNewsItem,
-  } = useNewsContext();
+  const { news, loading, saveNewsItem, removeSavedNewsItem } = useNewsContext();
   const carouselRef = useRef<Carousel<any>>(null);
   const [savedNewsIds, setSavedNewsIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("My Feed");
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [action, setAction] = useState("Play");
-  const [highlightedText, setHighlightedText] = useState<string[]>([]);
-  const [typewriterText, setTypewriterText] = useState<string>("");
-  const [isHighlighting, setIsHighlighting] = useState(true); // Toggle between highlight and typewriter
+  const [activeIndex, setActiveIndex] = useState();
 
-  const handleSnapToItem = (index: number) => {
+  const handleSnapToItem = (index: any) => {
     setActiveIndex(index);
   };
 
@@ -50,51 +41,7 @@ export default function HomeScreen() {
     setSelectedCategory(category);
   };
 
-  // Handle button press to toggle between highlighting and typewriter
-  const handleActionPress = () => {
-    if (isHighlighting) {
-      highlightText();
-      setAction("Read");
-    } else {
-      typewriterEffect();
-      setAction("Play");
-    }
-    setIsHighlighting(!isHighlighting);
-  };
-
-  // Function to highlight words one by one
-  const highlightText = () => {
-    if (activeIndex !== null) {
-      const selectedNews = news[activeIndex].title.split(" ");
-      let i = 0;
-      setHighlightedText([]);
-      const interval = setInterval(() => {
-        if (i >= selectedNews.length) {
-          clearInterval(interval);
-        } else {
-          setHighlightedText((prev) => [...prev, selectedNews[i]]);
-          i++;
-        }
-      }, 500); // Adjust timing as per requirement
-    }
-  };
-
-  // Function to simulate typewriter effect
-  const typewriterEffect = () => {
-    if (activeIndex !== null) {
-      const selectedNews = news[activeIndex].title;
-      let i = 0;
-      setTypewriterText("");
-      const interval = setInterval(() => {
-        if (i >= selectedNews.length) {
-          clearInterval(interval);
-        } else {
-          setTypewriterText((prev) => prev + selectedNews[i]);
-          i++;
-        }
-      }, 100); // Adjust speed of typewriter effect
-    }
-  };
+  const handleActionPress = () => {};
 
   const categories = [
     "My Feed",
@@ -143,11 +90,6 @@ export default function HomeScreen() {
           )}
         />
       </View>
-      <View style={styles.navContainer2}>
-        <TouchableOpacity style={styles.pill} onPress={handleActionPress}>
-          <Text style={styles.pillText}>{action}</Text>
-        </TouchableOpacity>
-      </View>
       <View style={styles.carousel}>
         <Carousel
           ref={carouselRef}
@@ -179,17 +121,6 @@ export default function HomeScreen() {
             color="#0000ff"
             style={styles.footerLoader}
           />
-        )}
-      </View>
-
-      {/* Render Highlighted Text or Typewriter Text */}
-      <View style={styles.textContainer}>
-        {isHighlighting ? (
-          <Text style={styles.highlightedText}>
-            {highlightedText.join(" ")}
-          </Text>
-        ) : (
-          <Text style={styles.typewriterText}>{typewriterText}</Text>
         )}
       </View>
     </View>
@@ -247,19 +178,5 @@ const styles = StyleSheet.create({
   selectedPillText: {
     color: "#fff",
     fontWeight: "bold",
-  },
-  textContainer: {
-    position: "absolute",
-    bottom: 80,
-    alignSelf: "center",
-    paddingHorizontal: 10,
-  },
-  highlightedText: {
-    color: "yellow",
-    fontSize: 24,
-  },
-  typewriterText: {
-    color: "white",
-    fontSize: 24,
   },
 });
