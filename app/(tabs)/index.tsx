@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -91,30 +91,34 @@ export default function HomeScreen() {
         />
       </View>
       <View style={styles.carousel}>
-        <Carousel
-          ref={carouselRef}
-          data={news}
-          layout="stack"
-          firstItem={news.slice(0, 10).length - 1}
-          renderItem={({ item }) => (
-            <NewsCard
-              title={item.title}
-              description={item.description}
-              urlToImage={item.urlToImage}
-              url={item.url}
-              author={item.author}
-              isSaved={savedNewsIds.includes(item.url)}
-              onTitlePress={() => handleSaveToggle(item)}
-            />
-          )}
-          sliderHeight={height}
-          itemHeight={height}
-          vertical={true}
-          sliderWidth={width}
-          itemWidth={width}
-          snapToAlignment={"start"}
-          onSnapToItem={handleSnapToItem}
-        />
+        {news && news.length > 0 ? (
+          <Carousel
+            ref={carouselRef}
+            data={news}
+            layout="stack"
+            firstItem={news.slice(0, 10).length - 1}
+            renderItem={({ item }) => (
+              <NewsCard
+                title={item.title}
+                description={item.description}
+                urlToImage={item.urlToImage}
+                url={item.url}
+                author={item.author}
+                isSaved={savedNewsIds.includes(item.url)}
+                onTitlePress={() => handleSaveToggle(item)}
+              />
+            )}
+            sliderHeight={height}
+            itemHeight={height}
+            vertical={true}
+            sliderWidth={width}
+            itemWidth={width}
+            snapToAlignment={"start"}
+            onSnapToItem={handleSnapToItem}
+          />
+        ) : (
+          <Text>No News Available</Text> // Render something if no news is available
+        )}
         {loading && (
           <ActivityIndicator
             size="small"

@@ -62,13 +62,15 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
   const highlightText = () => {
     const words = description.split(" ");
-    setHighlightedText([]); // Reset highlighted text
+    setHighlightedText(words); // Set the entire text initially
     clearInterval(intervalRef.current); // Clear previous intervals
     let index = 0;
 
     intervalRef.current = setInterval(() => {
       if (index < words.length) {
-        setHighlightedText((prev) => [...prev, words[index]]);
+        setHighlightedText((prev) =>
+          prev.map((word, i) => (i === index ? `<highlight>${word}` : word))
+        );
         index++;
       } else {
         clearInterval(intervalRef.current);
@@ -110,8 +112,13 @@ const NewsCard: React.FC<NewsCardProps> = ({
         ) : displayMode === "highlight" ? (
           <Text style={styles.content}>
             {highlightedText.map((word, index) => (
-              <Text key={index} style={styles.highlight}>
-                {word}{" "}
+              <Text
+                key={index}
+                style={
+                  word.includes("<highlight>") ? styles.highlight : undefined
+                }
+              >
+                {word.replace("<highlight>", "")}{" "}
               </Text>
             ))}
           </Text> // Show highlighted text
