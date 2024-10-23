@@ -7,14 +7,15 @@ import {
 } from "firebase/auth";
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { auth } from "./firebase";
-import { ref, set, push, get, child, remove } from "firebase/database"; // Firebase Realtime Database functions
-import { db } from "./firebase"; // Import your Firebase config
+import { ref, set, push, get, remove } from "firebase/database";
+import { db } from "./firebase";
+import * as FileSystem from "expo-file-system";
+import Papa from "papaparse";
+import { Asset } from "expo-asset";
 
 interface NewsItem {
-  urlToImage: string;
   title: string;
   description: string;
-  url: string;
 }
 
 interface NewsContextType {
@@ -95,29 +96,38 @@ export const NewsProvider = ({ children }: { children: ReactNode }) => {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const baseUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=599b400f84f74625841e05ddc3fd06ff`;
-      const categoryQuery = category ? `&category=${category}` : "";
-      const sourceQuery = source ? `&sources=${source}` : `&page=${page}`;
+      const { localUri } = await Asset.fromModule(
+        require("../assets/data/Testcsvnews.csv")
+      ).downloadAsync();
+      const fileUri = localUri || "";
+      const csvContent = await FileSystem.readAsStringAsync(fileUri);
 
-      const response = await fetch(baseUrl + categoryQuery + sourceQuery);
-      const data = await response.json();
-      setNews((prevNews) =>
-        page === 1 ? data.articles : [...prevNews, ...data.articles]
-      );
+      Papa.parse(csvContent, {
+        header: true,
+        complete: (results) => {
+          const parsedNews = results.data.map((row: any) => ({
+            title: row.Trending,
+            description: row.Headline,
+          }));
+          setNews(parsedNews);
+        },
+        error: (error: any) => {
+          console.error("Error parsing CSV:", error);
+        },
+      });
     } catch (error) {
-      console.error("Error fetching news:", error);
+      console.error("Error fetching CSV file:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // In your NewsProvider, add these functions:
   const saveNewsItem = async (newsItem: any) => {
     if (!currentUser) return;
 
     try {
       const userRef = ref(db, `savedNews/${currentUser.uid}`);
-      const newNewsRef = push(userRef); // Create a new reference in the user's saved news list
+      const newNewsRef = push(userRef);
       await set(newNewsRef, newsItem);
       console.log("News item saved successfully!");
     } catch (error) {
@@ -131,12 +141,10 @@ export const NewsProvider = ({ children }: { children: ReactNode }) => {
     try {
       const userRef = ref(db, `savedNews/${currentUser.uid}`);
 
-      // Find the news item by its URL
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
         const savedNews = snapshot.val();
 
-        // Loop through the saved news to find the one with the matching URL
         const newsKey = Object.keys(savedNews).find(
           (key) => savedNews[key].url === newsUrl
         );
@@ -146,7 +154,7 @@ export const NewsProvider = ({ children }: { children: ReactNode }) => {
             db,
             `savedNews/${currentUser.uid}/${newsKey}`
           );
-          await remove(newsItemRef); // Remove the saved news item from the database
+          await remove(newsItemRef);
           console.log("News item removed successfully!");
         } else {
           console.log("News item not found!");
@@ -174,16 +182,8 @@ export const NewsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    setPage(1);
-    setNews([]);
     fetchNews();
-  }, [category, source]);
-
-  useEffect(() => {
-    if (page > 1) {
-      fetchNews();
-    }
-  }, [page]);
+  }, []);
 
   const loadMore = () => {
     setPage((prevPage) => prevPage + 1);

@@ -1,5 +1,3 @@
-// https://documenter.getpostman.com/view/3479169/Szf7zncp?version=latest#236e4205-de53-41e0-bfc2-f17d396f9741
-
 export const categories = [
   {
     code: "",

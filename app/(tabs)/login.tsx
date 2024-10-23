@@ -1,4 +1,3 @@
-// app/(tabs)/login.tsx
 import LoginForm from "@/components/LoginForm";
 import User from "@/components/User";
 import { useNewsContext } from "@/hooks/NewsContext";

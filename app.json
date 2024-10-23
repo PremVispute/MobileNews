@@ -28,7 +28,11 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": ["expo-router", "@react-native-google-signin/google-signin"],
+    "plugins": [
+      "expo-router",
+      "@react-native-google-signin/google-signin",
+      "expo-asset"
+    ],
     "experiments": {
       "typedRoutes": true
     },
@@ -40,6 +44,7 @@
         "projectId": "9259b96f-4d3a-4a93-b554-e7c9794d9cad"
       }
     },
+    "assetBundlePatterns": ["**/*", "../assets/data/Testcsvnews.csv"],
     "owner": "premvispute"
   }
 }

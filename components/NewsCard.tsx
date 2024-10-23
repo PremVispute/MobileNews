@@ -2,20 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   Dimensions,
-  ImageBackground,
   TouchableOpacity,
-  Linking,
 } from "react-native";
 
 interface NewsCardProps {
   title: string;
   description: string;
-  urlToImage: string;
-  url: string;
-  author: string;
   isSaved: boolean;
   onTitlePress: () => void;
 }
@@ -25,11 +19,8 @@ const { height, width } = Dimensions.get("window");
 const NewsCard: React.FC<NewsCardProps> = ({
   title,
   description,
-  urlToImage,
-  url,
   isSaved,
   onTitlePress,
-  author,
 }) => {
   const [action, setAction] = useState("Play");
   const [highlightedText, setHighlightedText] = useState<string[]>([]);
@@ -95,10 +86,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
   return (
     <View style={styles.card}>
-      <Image
-        source={{ uri: urlToImage }}
-        style={{ height: "45%", resizeMode: "cover", width: width }}
-      />
       <View style={styles.description}>
         <TouchableOpacity onPress={onTitlePress}>
           <Text style={[styles.title, { color: isSaved ? "blue" : "black" }]}>
@@ -125,28 +112,15 @@ const NewsCard: React.FC<NewsCardProps> = ({
         ) : (
           <Text style={styles.content}>{typedText}</Text> // Show typewriter text
         )}
-
-        <Text>
-          Short by
-          <Text style={{ fontWeight: "bold" }}> {author ?? "unknown"}</Text>
-        </Text>
       </View>
-
-      <ImageBackground
-        blurRadius={30}
-        style={styles.footer}
-        source={{ uri: urlToImage }}
-      >
-        <TouchableOpacity onPress={() => Linking.openURL(url)}>
-          <Text style={{ fontSize: 15, color: "white" }}>
-            '{description?.slice(0, 45)}...'
-          </Text>
-          <Text style={{ fontSize: 17, fontWeight: "bold", color: "white" }}>
-            Read More
-          </Text>
-        </TouchableOpacity>
-      </ImageBackground>
-
+      <TouchableOpacity>
+        <Text style={{ fontSize: 15, color: "white" }}>
+          '{description?.slice(0, 45)}...'
+        </Text>
+        <Text style={{ fontSize: 17, fontWeight: "bold", color: "white" }}>
+          Read More
+        </Text>
+      </TouchableOpacity>
       <View style={styles.navContainer2}>
         <TouchableOpacity style={styles.pill} onPress={handleActionPress}>
           <Text style={styles.pillText}>{action}</Text>
@@ -169,25 +143,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-    transform: [{ scaleY: -1 }],
     width: width,
-  },
-  image: {
-    width: "100%",
-    height: "60%",
+    justifyContent: "center", // Center content vertically
+    alignItems: "center", // Center content horizontally
+    transform: [{ scaleY: -1 }],
   },
   description: {
     padding: 15,
     flex: 1,
+    justifyContent: "center", // Center text vertically within the description container
+    alignItems: "center", // Center text horizontally
   },
   title: {
     fontSize: 25,
     fontWeight: "bold",
     paddingBottom: 10,
+    textAlign: "center", // Ensure title is centered
   },
   content: {
-    fontSize: 18,
+    fontSize: 40,
     paddingBottom: 10,
+    textAlign: "center", // Ensure description is centered
   },
   highlight: {
     backgroundColor: "yellow",

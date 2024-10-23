@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -40,8 +40,6 @@ export default function HomeScreen() {
   const handleCategoryPress = (category: string) => {
     setSelectedCategory(category);
   };
-
-  const handleActionPress = () => {};
 
   const categories = [
     "My Feed",
@@ -101,9 +99,6 @@ export default function HomeScreen() {
               <NewsCard
                 title={item.title}
                 description={item.description}
-                urlToImage={item.urlToImage}
-                url={item.url}
-                author={item.author}
                 isSaved={savedNewsIds.includes(item.url)}
                 onTitlePress={() => handleSaveToggle(item)}
               />
@@ -117,7 +112,7 @@ export default function HomeScreen() {
             onSnapToItem={handleSnapToItem}
           />
         ) : (
-          <Text>No News Available</Text> // Render something if no news is available
+          <Text>No News Available</Text>
         )}
         {loading && (
           <ActivityIndicator

@@ -18,14 +18,13 @@ interface NewsItem {
 export default function User() {
   const { currentUser, logout, fetchSavedNews } = useNewsContext();
 
-  // Explicitly define the type of savedNews as NewsItem[]
   const [savedNews, setSavedNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
     const loadSavedNews = async () => {
       try {
         const newsItems = await fetchSavedNews(currentUser.uid);
-        setSavedNews(newsItems); // Correctly typed now
+        setSavedNews(newsItems);
       } catch (error) {
         console.error("Error loading saved news:", error);
       }
@@ -53,7 +52,6 @@ export default function User() {
           <Text style={styles.logoutButton}>Logout</Text>
         </TouchableOpacity>
       </View>
-
       <FlatList
         data={savedNews}
         keyExtractor={(item, index) => index.toString()}
